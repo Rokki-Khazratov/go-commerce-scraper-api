@@ -1,43 +1,46 @@
 # Go commerce scraper API
 
-A Go prototype that reads a retailer's laptop catalogue and serves the extracted products as JSON.
+A small Go service that parses a retailer's laptop catalogue and exposes the extracted products as JSON.
 
-The application scrapes the catalogue at startup. A list request reads the collected products; a detail request follows the selected product's source link and extracts its details.
+The startup scrape builds an in-memory list. A product-detail request follows the selected item's source link and parses that page on demand.
 
-## Stack
+## How it works
 
-Go · goquery · Gorilla Mux · rs/cors
+![Retailer pages, startup parsing, in-memory catalogue and on-demand detail requests](docs/diagrams/architecture.png)
+
+[Vector diagram](docs/diagrams/architecture.svg) · [Editable HTML](docs/diagrams/architecture.html)
 
 ## Run locally
 
-Use Go compatible with the version declared in `go.mod`.
+Use Go compatible with `go.mod` (Go 1.21.6 or newer).
 
 ```bash
-git clone https://github.com/Rokki-Khazratov/scrapped-data-api.git
-cd scrapped-data-api
+git clone https://github.com/Rokki-Khazratov/go-commerce-scraper-api.git
+cd go-commerce-scraper-api
 go mod download
 go run .
 ```
 
-The server listens on `http://localhost:8080`.
+The server listens on http://localhost:8080.
 
-| Request | Result |
-| --- | --- |
-| `GET /api/laptops/` | Products collected at startup |
-| `GET /api/laptop/1/` | Details scraped from the first product's source page |
-
-## How it fits together
-
-```mermaid
-flowchart LR
-    A[Retailer catalogue HTML] --> B[goquery scraper]
-    B --> C[Products in memory]
-    C --> D[GET /api/laptops/]
-    C --> E[Selected source link]
-    E --> F[Detail-page scraper]
-    F --> G[GET /api/laptop/id/]
+```bash
+curl http://localhost:8080/api/laptops/
+curl http://localhost:8080/api/laptop/1/
 ```
+
+| Endpoint | Behaviour |
+| --- | --- |
+| `GET /api/laptops/` | Returns the catalogue collected at startup |
+| `GET /api/laptop/{id}/` | Fetches and parses the selected product page |
+
+Catalogue records include title, price, image links and the source URL. Invalid IDs return an error rather than selecting another item.
 
 ## Scope
 
-This is a historical scraping experiment. Catalogue data is held in memory, product IDs depend on its collected order, and extraction depends on the source site's HTML. The configured retailer and selectors need rechecking before treating the output as current data. 
+This is a historical scraping prototype. IDs depend on the collected order, records disappear when the process stops, and extraction depends on the retailer's HTML selectors. Check the configured source and selectors before relying on fresh results.
+
+## Stack and code
+
+Go · goquery · Gorilla Mux · rs/cors
+
+`main.go` registers the HTTP routes. `data-scrappers/scrapper/` contains catalogue and detail parsing. The root application is started with `go run .`.
