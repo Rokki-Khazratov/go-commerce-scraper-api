@@ -26,8 +26,6 @@ The server listens on `http://localhost:8080`.
 | `GET /api/laptops/` | Products collected at startup |
 | `GET /api/laptop/1/` | Details scraped from the first product's source page |
 
-The previous README described a `POST /api/parse` endpoint. That route is not registered in the current `main.go`.
-
 ## How it fits together
 
 ```mermaid
@@ -42,4 +40,4 @@ flowchart LR
 
 ## Scope
 
-This is a historical scraping experiment. Catalogue data is held in memory, product IDs depend on its collected order, and extraction depends on the source site's HTML. The configured retailer and selectors need rechecking before treating the output as current data. No database, scheduled refresh or production availability is claimed.
+This is a historical scraping experiment. Catalogue data is held in memory, product IDs depend on its collected order, and extraction depends on the source site's HTML. The configured retailer and selectors need rechecking before treating the output as current data. 
